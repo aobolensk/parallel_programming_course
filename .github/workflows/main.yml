@@ -731,6 +731,11 @@ jobs:
     defaults:
       run:
         shell: bash
+    strategy:
+      matrix:
+        mpi:
+          - msmpi
+          - intelmpi
     steps:
       - uses: actions/checkout@v4
       - name: Add msbuild to PATH
@@ -740,7 +745,7 @@ jobs:
       - name: Setup MPI
         uses: mpi4py/setup-mpi@v1
         with:
-          mpi: msmpi
+          mpi: ${{ matrix.mpi }}
       - name: Download installed package
         uses: actions/download-artifact@v4
         with:
@@ -791,6 +796,11 @@ jobs:
     defaults:
       run:
         shell: bash
+    strategy:
+      matrix:
+        mpi:
+          - msmpi
+          - intelmpi
     steps:
       - uses: actions/checkout@v4
       - name: Add msbuild to PATH
