@@ -1,9 +1,11 @@
 name: Pages
 
 on:
-  push:
-  pull_request:
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - main.yml
+    types:
+      - completed
 
 permissions:
   id-token: write
@@ -13,6 +15,7 @@ permissions:
 jobs:
   build-sphinx:
     runs-on: ubuntu-24.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,6 +43,7 @@ jobs:
           path: ./build/docs/_build/html
   build-scoreboard:
     runs-on: ubuntu-24.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,6 +51,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Download perf-stat artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-stat
+          path: .
+      - name: Unzip perf stats
+        run: unzip perf-stat.zip
       - name: Install dependencies
         run: |
           python3 -m pip install -r requirements.txt
@@ -62,7 +73,9 @@ jobs:
           name: scoreboard
           path: ./build/scoreboard/html/
   deploy-pages:
-    if: github.ref == 'refs/heads/master'
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.ref == 'refs/heads/master'
     needs:
       - build-sphinx
       - build-scoreboard

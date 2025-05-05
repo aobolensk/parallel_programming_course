@@ -3,6 +3,7 @@ import os
 import re
 import xlsxwriter
 import multiprocessing
+import csv
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', help='Input file path (logs of perf tests, .txt)', required=True)
@@ -100,3 +101,20 @@ for table_name in result_tables:
         it_i = 1
         it_j += 1
     workbook.close()
+    # Dump CSV for performance times
+    csv_file = os.path.join(xlsx_path, table_name + '_perf_table.csv')
+    with open(csv_file, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        # Write header: Task, SEQ, OMP, TBB, STL, ALL
+        writer.writerow(['Task', 'SEQ', 'OMP', 'TBB', 'STL', 'ALL'])
+        for task_name in sorted(result_tables[table_name].keys()):
+            seq_time = result_tables[table_name][task_name]['seq']
+            row = [
+                task_name,
+                1.0 if seq_time != 0 else '?',
+                (result_tables[table_name][task_name]['omp'] / seq_time) if seq_time != 0 else '?',
+                (result_tables[table_name][task_name]['tbb'] / seq_time) if seq_time != 0 else '?',
+                (result_tables[table_name][task_name]['stl'] / seq_time) if seq_time != 0 else '?',
+                (result_tables[table_name][task_name]['all'] / seq_time) if seq_time != 0 else '?',
+            ]
+            writer.writerow(row)
