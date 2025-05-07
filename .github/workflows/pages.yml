@@ -1,11 +1,9 @@
 name: Pages
 
 on:
-  workflow_run:
-    workflows:
-      - main.yml
-    types:
-      - completed
+  push:
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -15,7 +13,6 @@ permissions:
 jobs:
   build-sphinx:
     runs-on: ubuntu-24.04
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,7 +40,6 @@ jobs:
           path: ./build/docs/_build/html
   build-scoreboard:
     runs-on: ubuntu-24.04
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -73,9 +69,7 @@ jobs:
           name: scoreboard
           path: ./build/scoreboard/html/
   deploy-pages:
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     needs:
       - build-sphinx
       - build-scoreboard
