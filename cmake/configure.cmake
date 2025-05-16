@@ -62,10 +62,6 @@ if( UNIX )
         -Wold-style-definition               \
         -Wmissing-prototypes")
 
-    if ("${ENABLE_ADDRESS_SANITIZER}" OR "${ENABLE_UB_SANITIZER}")
-        set (COMMON_COMPILER_FLAGS "${COMMON_COMPILER_FLAGS} -Wno-cast-align")
-    endif()
-
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${COMMON_COMPILER_FLAGS}")
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${COMMON_COMPILER_FLAGS}")
     if (USE_COVERAGE)
