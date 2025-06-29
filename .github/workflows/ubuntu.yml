@@ -367,7 +367,8 @@ jobs:
           #!/bin/bash
           # Get MPI rank from environment variables
           rank_id="${PMI_RANK:-${OMPI_COMM_WORLD_RANK:-${SLURM_PROCID:-$$}}}"
-          export GCOV_PREFIX="$(pwd)/mpi_coverage/rank_${rank_id}"
+          export GCOV_PREFIX="mpi_coverage/rank_${rank_id}"
+          export GCOV_PREFIX_STRIP=4
           mkdir -p "$GCOV_PREFIX"
           exec "$@"
           EOF
@@ -378,7 +379,6 @@ jobs:
         env:
           PPC_NUM_PROC: 2
           PPC_NUM_THREADS: 2
-          GCOV_PREFIX_STRIP: 0
       - name: Run tests (threads)
         run: python3 scripts/run_tests.py --running-type="threads" --counts 1 2 3 4
         env:
@@ -405,15 +405,31 @@ jobs:
           gcovr_cmd="$gcovr_cmd --exclude '.*modules/core/util/include/func_test_util.hpp'"
           gcovr_cmd="$gcovr_cmd --exclude '.*modules/core/util/src/func_test_util.cpp'"
 
-          # Add object directories for all ranks
+          # Copy rank coverage data to build directory to avoid path issues
+          echo "Merging coverage data from all ranks..."
           for rank_dir in ../mpi_coverage/rank_*; do
             if [ -d "$rank_dir" ]; then
-              echo "Adding coverage data from $rank_dir"
-              gcovr_cmd="$gcovr_cmd --object-directory $rank_dir"
+              echo "Processing coverage data from $rank_dir"
+              # Find .gcda files and copy them to the build directory, merging with existing ones
+              find "$rank_dir" -name "*.gcda" -type f | while read gcda_file; do
+                # Extract the relative path after the long absolute path
+                rel_path=$(echo "$gcda_file" | grep -o 'build/.*\.gcda$' || echo "")
+                if [ -n "$rel_path" ]; then
+                  target_file="./${rel_path#build/}"
+                  target_dir=$(dirname "$target_file")
+                  mkdir -p "$target_dir"
+                  # Merge coverage data using gcov-tool if available, otherwise just copy
+                  if command -v gcov-tool >/dev/null 2>&1 && [ -f "$target_file" ]; then
+                    gcov-tool merge "$target_file" "$gcda_file" -o "$target_file" 2>/dev/null || cp "$gcda_file" "$target_file"
+                  else
+                    cp "$gcda_file" "$target_file" 2>/dev/null || true
+                  fi
+                fi
+              done
             fi
           done
 
-          # Also include main build directory
+          # Use only main build directory now that all coverage data is merged
           gcovr_cmd="$gcovr_cmd --object-directory ."
 
           # Generate output
