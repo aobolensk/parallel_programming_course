@@ -99,7 +99,7 @@ class PPCRunner:
             )
 
     def run_core(self):
-        if platform.system() == "Linux" and not self.__ppc_env.get("PPC_ASAN_RUN"):
+        if platform.system() == "Linux" and not self.__ppc_env.get("PPC_ASAN_RUN") and str(self.__ppc_num_proc) == "1":
             self.__run_exec(
                 shlex.split(self.valgrind_cmd)
                 + [str(self.work_dir / 'core_func_tests')]

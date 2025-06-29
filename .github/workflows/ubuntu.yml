@@ -374,7 +374,7 @@ jobs:
           chmod +x mpi_coverage_wrapper.sh
 
           # Run MPI tests with coverage wrapper
-          mpirun -np 2 ./mpi_coverage_wrapper.sh python3 scripts/run_tests.py --running-type="processes" --counts 2
+          ./mpi_coverage_wrapper.sh python3 scripts/run_tests.py --running-type="processes" --counts 2
         env:
           PPC_NUM_PROC: 2
           PPC_NUM_THREADS: 2
