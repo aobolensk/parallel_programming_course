@@ -360,31 +360,68 @@ jobs:
       - name: Build project
         run: |
           cmake --build build --parallel
-      - name: Run tests (MPI)
-        run: python3 scripts/run_tests.py --running-type="processes"
+      - name: Run tests (MPI) with coverage
+        run: |
+          mkdir -p mpi_coverage
+          cat > mpi_coverage_wrapper.sh << 'EOF'
+          #!/bin/bash
+          # Get MPI rank from environment variables
+          rank_id="${PMI_RANK:-${OMPI_COMM_WORLD_RANK:-${SLURM_PROCID:-$$}}}"
+          export GCOV_PREFIX="$(pwd)/mpi_coverage/rank_${rank_id}"
+          mkdir -p "$GCOV_PREFIX"
+          exec "$@"
+          EOF
+          chmod +x mpi_coverage_wrapper.sh
+
+          # Run MPI tests with coverage wrapper
+          mpirun -np 2 ./mpi_coverage_wrapper.sh python3 scripts/run_tests.py --running-type="processes" --counts 2
         env:
           PPC_NUM_PROC: 2
           PPC_NUM_THREADS: 2
+          GCOV_PREFIX_STRIP: 0
       - name: Run tests (threads)
         run: python3 scripts/run_tests.py --running-type="threads" --counts 1 2 3 4
         env:
           PPC_NUM_PROC: 1
-      - name: Generate gcovr Coverage Data
+      - name: Collect and merge coverage data from all MPI ranks
         run: |
-          mkdir cov-report
+          mkdir -p cov-report
           cd build
-          gcovr -r ../ \
-                --exclude '.*3rdparty/.*' \
-                --exclude '/usr/.*' \
-                --exclude '.*tasks/.*/tests/.*' \
-                --exclude '.*modules/.*/tests/.*' \
-                --exclude '.*tasks/common/runners/.*' \
-                --exclude '.*modules/core/runners/.*' \
-                --exclude '.*modules/core/util/include/perf_test_util.hpp' \
-                --exclude '.*modules/core/util/include/func_test_util.hpp' \
-                --exclude '.*modules/core/util/src/func_test_util.cpp' \
-                --xml --output ../coverage.xml \
-                --html=../cov-report/index.html --html-details
+
+          # Find all .gcda files from all ranks
+          echo "Finding coverage files..."
+          find . -name "*.gcda" -type f | head -10
+          find ../mpi_coverage -name "*.gcda" -type f 2>/dev/null | head -10 || true
+
+          # Create comprehensive gcovr command that includes all rank data
+          gcovr_cmd="gcovr -r ../"
+          gcovr_cmd="$gcovr_cmd --exclude '.*3rdparty/.*'"
+          gcovr_cmd="$gcovr_cmd --exclude '/usr/.*'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*tasks/.*/tests/.*'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*modules/.*/tests/.*'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*tasks/common/runners/.*'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*modules/core/runners/.*'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*modules/core/util/include/perf_test_util.hpp'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*modules/core/util/include/func_test_util.hpp'"
+          gcovr_cmd="$gcovr_cmd --exclude '.*modules/core/util/src/func_test_util.cpp'"
+
+          # Add object directories for all ranks
+          for rank_dir in ../mpi_coverage/rank_*; do
+            if [ -d "$rank_dir" ]; then
+              echo "Adding coverage data from $rank_dir"
+              gcovr_cmd="$gcovr_cmd --object-directory $rank_dir"
+            fi
+          done
+
+          # Also include main build directory
+          gcovr_cmd="$gcovr_cmd --object-directory ."
+
+          # Generate output
+          gcovr_cmd="$gcovr_cmd --xml --output ../coverage.xml"
+          gcovr_cmd="$gcovr_cmd --html=../cov-report/index.html --html-details"
+
+          echo "Running: $gcovr_cmd"
+          eval $gcovr_cmd
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5.4.3
         with:
