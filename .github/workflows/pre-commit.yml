@@ -5,11 +5,14 @@ on:
   pull_request:
   workflow_call:
 
+env:
+  DOCKER_IMAGE: "ghcr.io/learning-process/ppc-ubuntu:1.1"
+
 jobs:
   pre-commit:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/learning-process/ppc-ubuntu:1.1
+      image: ${{ env.DOCKER_IMAGE }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}

@@ -1,11 +1,14 @@
 on:
   workflow_call:
 
+env:
+  DOCKER_IMAGE: "ghcr.io/learning-process/ppc-ubuntu:1.1"
+
 jobs:
   ubuntu-gcc-build-perf-stats:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/learning-process/ppc-ubuntu:1.1
+      image: ${{ env.DOCKER_IMAGE }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
