@@ -74,6 +74,33 @@ class FakeSlowTask : public TestTask<InType, OutType> {
   }
 };
 
+// Template specialization for string input
+template <>
+class TestTask<std::string, size_t> : public ppc::task::Task<std::string, size_t> {
+ public:
+  explicit TestTask(const std::string& in) {
+    this->GetInput() = in;
+  }
+
+  bool ValidationImpl() override {
+    return !this->GetInput().empty();
+  }
+
+  bool PreProcessingImpl() override {
+    this->GetOutput() = 0;
+    return true;
+  }
+
+  bool RunImpl() override {
+    this->GetOutput() = this->GetInput().size();
+    return true;
+  }
+
+  bool PostProcessingImpl() override {
+    return true;
+  }
+};
+
 }  // namespace ppc::test
 
 TEST(task_tests, check_int32_t) {
@@ -341,6 +368,72 @@ TEST(TaskTest, PostProcessingThrowsIfCalledBeforeRun) {
   task->Validation();
   task->PreProcessing();
   EXPECT_THROW(task->PostProcessing(), std::runtime_error);
+}
+
+// Test uncovered template instantiations
+TEST(task_tests, check_unsigned_types) {
+  std::vector<unsigned char> uc_in(5, 1);
+  ppc::test::TestTask<std::vector<unsigned char>, unsigned char> uc_task(uc_in);
+  uc_task.Validation();
+  uc_task.PreProcessing();
+  uc_task.Run();
+  uc_task.PostProcessing();
+  EXPECT_EQ(static_cast<size_t>(uc_task.GetOutput()), uc_in.size());
+
+  std::vector<unsigned int> ui_in(5, 1);
+  ppc::test::TestTask<std::vector<unsigned int>, unsigned int> ui_task(ui_in);
+  ui_task.Validation();
+  ui_task.PreProcessing();
+  ui_task.Run();
+  ui_task.PostProcessing();
+  EXPECT_EQ(static_cast<size_t>(ui_task.GetOutput()), ui_in.size());
+}
+
+// Test all enum values and core functionality
+TEST(TaskTest, EnumAndCoreFunctionality) {
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kALL), "all");
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kMPI), "mpi");
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kOMP), "omp");
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kSEQ), "seq");
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kSTL), "stl");
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kTBB), "tbb");
+  EXPECT_EQ(TypeOfTaskToString(TypeOfTask::kUnknown), "unknown");
+
+  std::vector<int> in(5, 1);
+  ppc::test::TestTask<std::vector<int>, int> task(in);
+
+  // Test performance mode
+  task.GetStateOfTesting() = StateOfTesting::kPerf;
+  task.Validation();
+  task.PreProcessing();
+  task.Run();
+  task.PostProcessing();
+
+  // Test type setters/getters
+  task.SetTypeOfTask(TypeOfTask::kMPI);
+  EXPECT_EQ(task.GetDynamicTypeOfTask(), TypeOfTask::kMPI);
+  EXPECT_EQ(task.GetStatusOfTask(), StatusOfTask::kEnabled);
+  auto static_type = ppc::test::TestTask<std::vector<int>, int>::GetStaticTypeOfTask();
+  EXPECT_EQ(static_type, TypeOfTask::kUnknown);
+
+  // Test TaskGetter
+  auto shared_task = TaskGetter<ppc::test::TestTask<std::vector<int>, int>>(in);
+  EXPECT_NE(shared_task, nullptr);
+}
+
+// Test pipeline edge cases
+TEST(TaskTest, PipelineEdgeCases) {
+  std::vector<int> in(5, 1);
+  ppc::test::TestTask<std::vector<int>, int> task(in);
+
+  task.Validation();
+  task.PreProcessing();
+  task.Run();
+  task.Run();  // Multiple runs allowed
+  task.PostProcessing();
+
+  // Validation after completion
+  EXPECT_NO_THROW(task.Validation());
 }
 
 int main(int argc, char** argv) {
