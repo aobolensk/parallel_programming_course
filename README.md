@@ -32,3 +32,14 @@ The following parallel programming technologies are considered in practice:
    First you should test you work locally with all the scripts (code style).
    - Respect others time and don't slow down the job queue
 2. Carefully check if the program can hang.
+
+## Related papers
+
+1. Nesterov, A. (2021). *Automation of teaching practice processes using the parallel programming course
+   as a case study* [in Russian] (original title: "Автоматизация процессов преподавания практики на
+   примере курса по параллельному программированию"). In [*Russian Supercomputing Days*,
+   pp. 52-61.](https://web.archive.org/web/20250416004721/https://russianscdays.org/files/2021/RuSCDays21_Proceedings.pdf#page=52)
+1. Nesterov, A., Obolenskiy, A., Sysoyev, A., Meyerov, I. (2026). *Practical Aspects of Teaching Parallel
+   Programming at the Lobachevsky University*. In V. Voevodin, A. Antonov, D. Nikitenko (Eds.),
+   *Supercomputing* (RuSCDays 2025), Lecture Notes in Computer Science, vol. 16196, pp. 518-532.
+   Springer. [DOI: 10.1007/978-3-032-13127-0_37](https://doi.org/10.1007/978-3-032-13127-0_37)
