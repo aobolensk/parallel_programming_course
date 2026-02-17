@@ -16,6 +16,7 @@ Resources:
 - [Parallel Programming Course Slides](https://learning-process.github.io/parallel_programming_slides/)
 - [Course Scoreboard](https://learning-process.github.io/parallel_programming_course/scoreboard/)
 - [Code Coverage Report](https://learning-process.github.io/parallel_programming_course/coverage/)
+- Parallel Programming Course [related publications citing](CITING.md)
 
 ## Parallel programming technologies
 
@@ -32,36 +33,3 @@ The following parallel programming technologies are considered in practice:
    First you should test you work locally with all the scripts (code style).
    - Respect others time and don't slow down the job queue
 2. Carefully check if the program can hang.
-
-## Related papers
-
-Use these LaTeX citation keys in your text:
-
-- `\cite{nesterov2021automation}`
-- `\cite{nesterov2026practical}`
-
-```bibtex
-@inproceedings{nesterov2021automation,
-  author    = {Nesterov, A.},
-  title     = {Automation of teaching practice processes using the parallel programming course as a case study},
-  booktitle = {Russian Supercomputing Days},
-  year      = {2021},
-  pages     = {52--61},
-  note      = {In Russian},
-  url       = {https://web.archive.org/web/20250416004721/https://russianscdays.org/files/2021/RuSCDays21_Proceedings.pdf#page=52}
-}
-
-@incollection{nesterov2026practical,
-  author    = {Nesterov, A. and Obolenskiy, A. and Sysoyev, A. and Meyerov, I.},
-  title     = {Practical Aspects of Teaching Parallel Programming at the Lobachevsky University},
-  booktitle = {Supercomputing (RuSCDays 2025)},
-  editor    = {Voevodin, V. and Antonov, A. and Nikitenko, D.},
-  series    = {Lecture Notes in Computer Science},
-  volume    = {16196},
-  pages     = {518--532},
-  year      = {2026},
-  publisher = {Springer},
-  doi       = {10.1007/978-3-032-13127-0_37},
-  url       = {https://doi.org/10.1007/978-3-032-13127-0_37}
-}
-```
