@@ -16,7 +16,7 @@ Resources:
 - [Parallel Programming Course Slides](https://learning-process.github.io/parallel_programming_slides/)
 - [Course Scoreboard](https://learning-process.github.io/parallel_programming_course/scoreboard/)
 - [Code Coverage Report](https://learning-process.github.io/parallel_programming_course/coverage/)
-- Parallel Programming Course [related publications citing](CITING.md)
+- Parallel Programming Course [related publications citing](CITATION.md)
 
 ## Parallel programming technologies
 
