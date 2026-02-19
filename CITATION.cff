@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: Parallel Programming Course
+message: "If you use this project, please cite it using the metadata in this file."
+type: software
+authors:
+  - name: Learning Process developers
+repository-code: "https://github.com/learning-process/parallel_programming_course"
+url: "https://learning-process.github.io/parallel_programming_course/en/"
+license: BSD-3-Clause
+keywords:
+  - parallel programming
+  - education
+  - C++
+  - MPI
+  - OpenMP
+  - oneTBB
