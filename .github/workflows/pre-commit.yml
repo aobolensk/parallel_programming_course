@@ -19,6 +19,17 @@ jobs:
           post_comment: false
           fail_on_find: true
 
+  link-check:
+    if: github.repository == 'learning-process/parallel_programming_course'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: true
+          failIfEmpty: false
+
   pre-commit:
     needs: check-file-sizes
     runs-on: ubuntu-24.04
