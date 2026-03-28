@@ -96,12 +96,23 @@ class BaseRunFuncTests : public ::testing::TestWithParam<FuncTestParam<InType, O
   }
 
   /// @brief Executes the full task pipeline with validation.
-  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   void ExecuteTaskPipeline() {
+    ValidateTask();
+    RunTaskStages();
+    ValidateTaskOutput();
+  }
+
+  void ValidateTask() {
     EXPECT_TRUE(task_->Validation());
+  }
+
+  void RunTaskStages() {
     EXPECT_TRUE(task_->PreProcessing());
     EXPECT_TRUE(task_->Run());
     EXPECT_TRUE(task_->PostProcessing());
+  }
+
+  void ValidateTaskOutput() {
     EXPECT_TRUE(CheckTestOutputData(task_->GetOutput()));
   }
 
