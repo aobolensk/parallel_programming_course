@@ -23,11 +23,6 @@ inline ppc::task::TaskDescriptor MakeTaskDescriptor(std::string_view task_namesp
           .display_name = std::string(task_namespace) + "_" + task_name};
 }
 
-template <typename TestParam>
-const ppc::task::TaskDescriptor &GetTaskDescriptor(const TestParam &test_param) {
-  return std::get<static_cast<std::size_t>(GTestParamIndex::kTaskDescriptor)>(test_param);
-}
-
 inline bool IsMpiTaskType(ppc::task::TypeOfTask type) {
   return type == ppc::task::TypeOfTask::kMPI || type == ppc::task::TypeOfTask::kALL;
 }
