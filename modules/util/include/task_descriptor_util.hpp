@@ -15,10 +15,10 @@ std::string ResolveTaskIdentifier(const std::string &settings_path) {
                   { Task::GetTaskIdentifier() } -> std::convertible_to<std::string_view>;
                 }) {
     return std::string(Task::GetTaskIdentifier());
+  } else {
+    const std::filesystem::path path(settings_path);
+    return path.has_parent_path() ? path.parent_path().filename().string() : path.stem().string();
   }
-
-  const std::filesystem::path path(settings_path);
-  return path.has_parent_path() ? path.parent_path().filename().string() : path.stem().string();
 }
 
 inline ppc::task::TaskDescriptor MakeTaskDescriptor(std::string_view task_namespace, ppc::task::TypeOfTask task_type,
