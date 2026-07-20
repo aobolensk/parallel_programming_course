@@ -241,8 +241,8 @@ class BaseRunPerfTests : public ::testing::TestWithParam<PerfTestParam<InType, O
 
 template <typename TaskType, typename InputType>
 auto MakePerfTaskTuples(const std::string &settings_path, std::string_view settings_task_path = {}) {
-  const auto descriptor = MakeTaskDescriptor(TaskType::GetTaskIdentifier(), TaskType::GetStaticTypeOfTask(),
-                                             settings_path, settings_task_path);
+  const auto descriptor = MakeTaskDescriptor(ResolveTaskIdentifier<TaskType>(settings_path),
+                                             TaskType::GetStaticTypeOfTask(), settings_path, settings_task_path);
 
   return std::make_tuple(
       PerfTestCase<InputType, typename TaskType::OutputType>{ppc::task::TaskGetter<TaskType, InputType>, descriptor});

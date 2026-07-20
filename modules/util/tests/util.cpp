@@ -3,7 +3,6 @@
 #include <gtest/gtest-spi.h>
 #include <gtest/gtest.h>
 
-#include <cstddef>
 #include <libenvpp/detail/environment.hpp>
 #include <libenvpp/detail/get.hpp>
 #include <string>
@@ -73,6 +72,29 @@ namespace {
 
 using FuncTestUtilParam = ppc::util::FuncTestParam<int, int, int>;
 
+class DocumentedTask : public ppc::task::Task<int, int> {
+ public:
+  explicit DocumentedTask(int input) : ppc::task::Task<int, int>(input, ppc::task::TypeOfTask::kSEQ) {}
+
+  static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
+    return ppc::task::TypeOfTask::kSEQ;
+  }
+
+ protected:
+  bool ValidationImpl() override {
+    return true;
+  }
+  bool PreProcessingImpl() override {
+    return true;
+  }
+  bool RunImpl() override {
+    return true;
+  }
+  bool PostProcessingImpl() override {
+    return true;
+  }
+};
+
 FuncTestUtilParam MakeFuncTestUtilParam(const std::string &test_name, ppc::task::TypeOfTask task_type,
                                         ppc::task::StatusOfTask task_status, int value) {
   return FuncTestUtilParam{.task_getter = [](int) -> ppc::task::TaskPtr<int, int> { return {}; },
@@ -91,6 +113,14 @@ void ExpectSingleNonFatalFailureContains(const ::testing::TestPartResultArray &f
 }
 
 }  // namespace
+
+TEST(FuncTestUtil, SupportsDocumentedTaskWithoutExplicitIdentifier) {
+  const auto test_params = std::make_tuple(1);
+  const std::string settings_path = "tasks/example/settings.json";
+  const auto test_cases = ppc::util::AddFuncTask<DocumentedTask, int>(test_params, settings_path, "threads");
+
+  EXPECT_EQ(std::get<0>(test_cases).descriptor.display_name, "example_seq_enabled");
+}
 
 TEST(FuncTestUtil, RunTestCasesWithTagAcceptsBareTags) {
   const auto test_tasks =

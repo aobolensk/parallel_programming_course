@@ -74,7 +74,8 @@ class NesterovARunFuncTestsProcesses3 : public ppc::util::BaseRunFuncTests<InTyp
 
 namespace {
 
-const std::array<TestType, 3> kTestParam = {{{3, "3"}, {5, "5"}, {7, "7"}}};
+const std::array<TestType, 3> kTestParam = {
+    {{.value = 3, .name = "3"}, {.value = 5, .name = "5"}, {.value = 7, .name = "7"}}};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<NesterovATestTaskMPI, InType>(kTestParam, PPC_SETTINGS_example, "processes.t3"),

@@ -191,8 +191,8 @@ auto ExpandToValues(const Tuple &t) {
 template <typename Task, typename InType, typename SizesContainer, std::size_t... Is>
 auto GenTaskTuplesImpl(const SizesContainer &sizes, const std::string &settings_path,
                        std::string_view settings_task_path, std::index_sequence<Is...> /*unused*/) {
-  const auto descriptor =
-      MakeTaskDescriptor(Task::GetTaskIdentifier(), Task::GetStaticTypeOfTask(), settings_path, settings_task_path);
+  const auto descriptor = MakeTaskDescriptor(ResolveTaskIdentifier<Task>(settings_path), Task::GetStaticTypeOfTask(),
+                                             settings_path, settings_task_path);
   return std::make_tuple(FuncTestCase<InType, typename Task::OutputType, std::decay_t<decltype(std::get<Is>(sizes))>>{
       ppc::task::TaskGetter<Task, InType>, std::get<Is>(sizes), descriptor}...);
 }

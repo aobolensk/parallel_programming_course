@@ -4,8 +4,6 @@
 #include <array>
 #include <atomic>
 #include <cctype>
-#include <cstdint>
-#include <cstdlib>
 #include <filesystem>
 #include <memory>
 #include <sstream>
